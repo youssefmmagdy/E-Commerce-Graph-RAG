@@ -1,0 +1,117 @@
+# STEP 1: Calculate Normalized Delivery Delays per State
+query_normalized_delays = """
+MATCH (c:Customer {customer_state: $state})-[:PLACED]->(o:Order)
+WITH $state as state, 
+     ROUND(AVG(o.delivery_delay_days), 2) as avg_delay_state
+RETURN state, avg_delay_state
+"""
+
+# Get all states and their average delays
+all_states_query = """
+MATCH (c:Customer)
+WITH DISTINCT c.customer_state as state
+MATCH (c:Customer {customer_state: state})-[:PLACED]->(o:Order)
+WITH state, ROUND(AVG(o.delivery_delay_days), 2) as avg_delay
+RETURN state, avg_delay
+ORDER BY state
+"""
+
+# STEP 2: Products that EXCEED EXPECTATIONS per State
+# A product exceeds expectations when:
+# AvgReviewScore(state, product) >= ExpectedCategoryScore × (1 - NormalizedDelay(state))
+
+query_exceed_expectations = """
+// Get all states with their avg delays
+MATCH (c:Customer)
+WITH DISTINCT c.customer_state as state
+MATCH (cust:Customer {customer_state: state})-[:PLACED]->(o:Order)<-[:REVIEWS]-(r:Review),
+      (o:Order)-[:CONTAINS]->(oi:Order_Item)-[:REFERS_TO]->(p:Product)
+WITH state, 
+     p.product_id as product_id, 
+     p.product_category_name as category,
+     ROUND(AVG(o.delivery_delay_days), 2) as avg_delay_product_state,
+     ROUND(AVG(r.review_score), 2) as avg_review_score_product_state
+
+// Get expected category score (global average for that category)
+WITH state, product_id, category, avg_delay_product_state, avg_review_score_product_state,
+     $min_delay as min_delay, $max_delay as max_delay, $delay_range as delay_range
+
+MATCH (p:Product {product_id: product_id})-[:REFERRED_FROM]->() 
+OPTIONAL MATCH (any_prod:Product {product_category_name: category})-[:REFERRED_FROM]->(any_oi:Order_Item)<-[:CONTAINS]->(any_o:Order)<-[:REVIEWS]-(any_r:Review)
+WITH state, product_id, category, avg_delay_product_state, avg_review_score_product_state,
+     min_delay, max_delay, delay_range,
+     CASE 
+       WHEN delay_range = 0 THEN 0
+       ELSE ROUND((avg_delay_product_state - min_delay) / delay_range, 4)
+     END as normalized_delay,
+     ROUND(AVG(any_r.review_score), 2) as expected_category_score
+
+WITH state, product_id, category, avg_review_score_product_state, normalized_delay,
+     expected_category_score,
+     ROUND(expected_category_score * (1 - normalized_delay), 2) as expected_score
+
+WITH state, product_id, category, avg_review_score_product_state, normalized_delay,
+     expected_category_score, expected_score,
+     CASE
+       WHEN avg_review_score_product_state >= expected_score THEN true
+       ELSE false
+     END as exceeds_expectations
+
+WHERE exceeds_expectations = true
+
+RETURN state, product_id, category, avg_review_score_product_state, 
+       expected_category_score, expected_score, normalized_delay,
+       ROUND(((avg_review_score_product_state - expected_score) / expected_score) * 100, 2) as improvement_percentage
+ORDER BY state, product_id
+"""
+
+# STEP 3: Compute Regional Statistics (Delivery Impact Metrics)
+# For each state, calculate: Min, Max, and Average Improvement %
+
+query_regional_stats = """
+// Get all states with their avg delays
+MATCH (c:Customer)
+WITH DISTINCT c.customer_state as state
+MATCH (cust:Customer {customer_state: state})-[:PLACED]->(o:Order)<-[:REVIEWS]-(r:Review),
+      (o:Order)-[:CONTAINS]->(oi:Order_Item)-[:REFERS_TO]->(p:Product)
+WITH state, 
+     p.product_id as product_id, 
+     p.product_category_name as category,
+     ROUND(AVG(o.delivery_delay_days), 2) as avg_delay_product_state,
+     ROUND(AVG(r.review_score), 2) as avg_review_score_product_state
+
+WITH state, product_id, category, avg_delay_product_state, avg_review_score_product_state,
+     $min_delay as min_delay, $max_delay as max_delay, $delay_range as delay_range
+
+OPTIONAL MATCH (any_prod:Product {product_category_name: category})-[:REFERRED_FROM]->(any_oi:Order_Item)<-[:CONTAINS]->(any_o:Order)<-[:REVIEWS]-(any_r:Review)
+WITH state, product_id, category, avg_delay_product_state, avg_review_score_product_state,
+     min_delay, max_delay, delay_range,
+     CASE 
+       WHEN delay_range = 0 THEN 0
+       ELSE ROUND((avg_delay_product_state - min_delay) / delay_range, 4)
+     END as normalized_delay,
+     ROUND(AVG(any_r.review_score), 2) as expected_category_score
+
+WITH state, product_id, category, avg_review_score_product_state, normalized_delay,
+     expected_category_score,
+     ROUND(expected_category_score * (1 - normalized_delay), 2) as expected_score
+
+WITH state, product_id, category, avg_review_score_product_state,
+     expected_category_score, expected_score,
+     ROUND(((avg_review_score_product_state - expected_score) / expected_score) * 100, 2) as improvement_percentage,
+     CASE
+       WHEN avg_review_score_product_state >= expected_score THEN true
+       ELSE false
+     END as exceeds_expectations
+
+WHERE exceeds_expectations = true
+
+WITH state,
+     ROUND(MIN(improvement_percentage), 2) as min_improvement,
+     ROUND(MAX(improvement_percentage), 2) as max_improvement,
+     ROUND(AVG(improvement_percentage), 2) as avg_improvement,
+     COUNT(*) as num_exceeding_products
+
+RETURN state, min_improvement, max_improvement, avg_improvement, num_exceeding_products
+ORDER BY state
+"""
