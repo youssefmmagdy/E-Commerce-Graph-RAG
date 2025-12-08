@@ -1,0 +1,47 @@
+# Query 1: Customers with at least one on-time delivery
+query_1 = """
+MATCH (c:Customer)-[:PLACED]->(o:Order)
+WHERE o.delivery_delay_days <= 0
+WITH DISTINCT c
+RETURN COUNT(c) AS number_of_customers_with_on_time_delivery
+"""
+
+# Query 2: Top 3 product categories by average review score in a given state
+query_2 = """
+MATCH (c:Customer {customer_state: $state})-[:PLACED]->(o:Order)<-[:REVIEWS]-(r:Review),
+      (o:Order)-[:CONTAINS]->(oi:Order_Item)-[:REFERS_TO]->(p:Product)
+WITH p.product_category_name AS category, r.review_score AS score
+RETURN category, ROUND(AVG(score), 2) AS avg_review_score
+ORDER BY avg_review_score DESC
+LIMIT 3
+"""
+
+# Query 3: Number of orders per state (including states with zero orders)
+query_3 = """
+MATCH (st:State)
+OPTIONAL MATCH (c:Customer {customer_state: st.name})-[:PLACED]->(o:Order)
+WITH st.name AS state, COUNT(DISTINCT o) AS num_orders
+RETURN state, num_orders
+ORDER BY state ASC
+"""
+
+# Query 4: Top 3 sellers with lowest average delivery delay
+query_4 = """
+MATCH (s:Seller)<-[:SOLD_BY]-(oi:Order_Item)<-[:CONTAINS]-(o:Order)
+WITH s.seller_id AS seller_id, ROUND(AVG(o.delivery_delay_days), 2) AS avg_delay
+RETURN seller_id, avg_delay
+ORDER BY avg_delay ASC
+LIMIT 3
+"""
+
+# Query 5: Products with highest average score
+query_5 = """
+MATCH (p:Product)<-[:REFERS_TO]-(oi:Order_Item)<-[:CONTAINS]-(o:Order)<-[:REVIEWS]-(r:Review)
+WITH p.product_id AS product_id, ROUND(AVG(r.review_score), 2) AS avg_score
+WITH ROUND(MAX(avg_score), 2) AS max_avg_score
+MATCH (p:Product)<-[:REFERS_TO]-(oi:Order_Item)<-[:CONTAINS]-(o:Order)<-[:REVIEWS]-(r:Review)
+WITH p.product_id AS product_id, ROUND(AVG(r.review_score), 2) AS avg_score, max_avg_score
+WHERE avg_score = max_avg_score
+RETURN product_id, avg_score
+ORDER BY product_id
+"""
