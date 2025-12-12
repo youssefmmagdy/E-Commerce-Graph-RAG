@@ -6,6 +6,7 @@ WITH DISTINCT c
 RETURN COUNT(c) AS number_of_customers_with_on_time_delivery
 """
 
+
 # Query 2: Top 3 product categories by average review score in a given state
 query_2 = """
 MATCH (c:Customer {customer_state: $state})-[:PLACED]->(o:Order)<-[:REVIEWS]-(r:Review),
@@ -32,16 +33,24 @@ WITH s.seller_id AS seller_id, ROUND(AVG(o.delivery_delay_days), 2) AS avg_delay
 RETURN seller_id, avg_delay
 ORDER BY avg_delay ASC
 LIMIT 3
-"""
+""" delay is in order, relations
 
 # Query 5: Products with highest average score
 query_5 = """
 MATCH (p:Product)<-[:REFERS_TO]-(oi:Order_Item)<-[:CONTAINS]-(o:Order)<-[:REVIEWS]-(r:Review)
 WITH p.product_id AS product_id, ROUND(AVG(r.review_score), 2) AS avg_score
 WITH ROUND(MAX(avg_score), 2) AS max_avg_score
+
 MATCH (p:Product)<-[:REFERS_TO]-(oi:Order_Item)<-[:CONTAINS]-(o:Order)<-[:REVIEWS]-(r:Review)
 WITH p.product_id AS product_id, ROUND(AVG(r.review_score), 2) AS avg_score, max_avg_score
 WHERE avg_score = max_avg_score
 RETURN product_id, avg_score
 ORDER BY product_id
-"""
+""" score in review
+
+MATCH (p:Product)<-[:REFERS_TO]-(oi:Order_Item)<-[:CONTTAINS]-(o:Order)<-[:REVIEWS]-(r:Review)
+WITH p.product_id AS product_id, ROUND(AVG(r.review_score), 2) AS avg_score
+WITH product_id, avg_score, MAX(avg_score) OVER () AS max_avg_score
+WHERE avg_score = max_avg_score
+RETURN product_id, avg_score
+ORDER BY product_id;
