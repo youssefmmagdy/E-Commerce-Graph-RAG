@@ -63,20 +63,28 @@ def chunk_text(text, max_length=400, overlap=100):
 
 all_rows = []
 for i, row in df.iterrows():
-    # Create a more semantically meaningful text with clear field labels
-    # This helps the embedding model understand the structure better
+    # Create a comprehensive text with all non-date columns for better semantic understanding
     txt = (
-        f"Product Category: {row['product_category_name']}. "
-        f"Customer City: {row['customer_city']}. "
-        f"Customer State: {row['customer_state']}. "
-        f"Order Status: {row['order_status']}. "
-        f"Price: {row['price']}. "
-        f"Freight Value: {row['freight_value']}. "
-        f"Review Score: {row['review_score']}. "
-        f"Delivery Delay Days: {row['delivery_delay_days']}. "
-        f"Sentiment: {row['sentiment_group']}. "
-        f"Review Title: {row['review_comment_title']}. "
-        f"Review Message: {row['review_comment_message']}."
+        f"Order ID: {row.get('order_id', 'N/A')}. "
+        f"Customer ID: {row.get('customer_id', 'N/A')}. "
+        f"Customer Unique ID: {row.get('customer_unique_id', 'N/A')}. "
+        f"Customer City: {row.get('customer_city', 'N/A')}. "
+        f"Customer State: {row.get('customer_state', 'N/A')}. "
+        f"Product ID: {row.get('product_id', 'N/A')}. "
+        f"Product Category: {row.get('product_category_name', 'N/A')}. "
+        f"Product Description Length: {row.get('product_description_lenght', 'N/A')}. "
+        f"Product Photos Quantity: {row.get('product_photos_qty', 'N/A')}. "
+        f"Seller ID: {row.get('seller_id', 'N/A')}. "
+        f"Order Status: {row.get('order_status', 'N/A')}. "
+        f"Price: {row.get('price', 'N/A')}. "
+        f"Freight Value: {row.get('freight_value', 'N/A')}. "
+        f"Delivery Delay Days: {row.get('delivery_delay_days', 'N/A')}. "
+        f"Review ID: {row.get('review_id', 'N/A')}. "
+        f"Review Score: {row.get('review_score', 'N/A')}. "
+        f"Review Length: {row.get('review_length', 'N/A')}. "
+        f"Review Title: {row.get('review_comment_title', 'N/A')}. "
+        f"Review Message: {row.get('review_comment_message', 'N/A')}. "
+        f"Sentiment: {row.get('sentiment_group', 'N/A')}."
     )
     all_rows.append(chunk_text(txt))
 
@@ -206,17 +214,24 @@ def _build_results(query, distances, indices, model_name):
         results.append({
             "source": f"embedding_{model_name}",
             "model": model_name,
-            "product_id": str(row.get('product_id', 'N/A')),
-            "product_category_name": str(row.get('product_category_name', 'N/A')),
+            "order_id": str(row.get('order_id', 'N/A')),
+            "customer_id": str(row.get('customer_id', 'N/A')),
+            "customer_unique_id": str(row.get('customer_unique_id', 'N/A')),
             "customer_city": str(row.get('customer_city', 'N/A')),
             "customer_state": str(row.get('customer_state', 'N/A')),
+            "product_id": str(row.get('product_id', 'N/A')),
+            "product_category_name": str(row.get('product_category_name', 'N/A')),
+            "product_description_lenght": float(row.get('product_description_lenght', 0)),
+            "product_photos_qty": float(row.get('product_photos_qty', 0)),
+            "seller_id": str(row.get('seller_id', 'N/A')),
             "order_status": str(row.get('order_status', 'N/A')),
             "price": float(row.get('price', 0)),
             "freight_value": float(row.get('freight_value', 0)),
-            "product_description_lenght": float(row.get('product_description_lenght', 0)),
-            "product_photos_qty": float(row.get('product_photos_qty', 0)),
             "delivery_delay_days": int(row.get('delivery_delay_days', 0)),
+            "review_id": str(row.get('review_id', 'N/A')),
             "review_score": float(row.get('review_score', 0)),
+            "review_length": int(row.get('review_length', 0)),
+            "review_comment_title": str(row.get('review_comment_title', 'N/A')),
             "review_comment_message": str(row.get('review_comment_message', 'N/A')),
             "sentiment_group": str(row.get('sentiment_group', 'N/A')),
             "similarity_distance": float(distances[0][i]),
