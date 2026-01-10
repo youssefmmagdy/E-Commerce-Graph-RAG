@@ -36,9 +36,9 @@ def check_and_generate_embeddings():
         st.info(f"🔄 Embeddings not found. Generating embeddings... This may take a few minutes.")
         st.write(f"Missing files: {', '.join(missing_files)}")
         
-        embeddor_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Embedding", "Embeddor.py")
+        embeddor_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Embedding", "embeddor.py")
         
-        with st.spinner("Generating embeddings with Embeddor.py..."):
+        with st.spinner("Generating embeddings with embeddor.py..."):
             try:
                 result = subprocess.run(
                     [sys.executable, embeddor_path],
