@@ -20,8 +20,8 @@ EMBEDDINGS_PATH_M1 = os.path.join(ARTIFACTS_DIR, "embeddings_minilm.npy")
 INDEX_PATH_M1 = os.path.join(ARTIFACTS_DIR, "faiss_minilm.index")
 
 # Model 2: MPNET (more accurate, 768 dimensions)
-EMBEDDINGS_PATH_M2 = os.path.join(ARTIFACTS_DIR, "embeddings_mpnet.npy")
-INDEX_PATH_M2 = os.path.join(ARTIFACTS_DIR, "faiss_mpnet.index")
+# EMBEDDINGS_PATH_M2 = os.path.join(ARTIFACTS_DIR, "embeddings_mpnet.npy")
+# INDEX_PATH_M2 = os.path.join(ARTIFACTS_DIR, "faiss_mpnet.index")
 
 # Shared chunks metadata
 CHUNKS_PATH = os.path.join(ARTIFACTS_DIR, "chunks.pkl")
@@ -102,8 +102,8 @@ def load_sentence_transformer(model_name: str):
 print("Loading Model 1: MiniLM-L6-v2 (384D, faster)...")
 embedder_m1 = load_sentence_transformer("all-MiniLM-L6-v2")
 
-print("Loading Model 2: MPNET-base-v2 (768D, more accurate)...")
-embedder_m2 = load_sentence_transformer("all-mpnet-base-v2")
+# print("Loading Model 2: MPNET-base-v2 (768D, more accurate)...")
+# embedder_m2 = load_sentence_transformer("all-mpnet-base-v2")
 
 # Flatten all_rows into a single list of chunks with row mapping
 all_chunks = []
@@ -147,21 +147,21 @@ else:
     np.save(EMBEDDINGS_PATH_M1, embeddings_m1)
     print(f"Saved MiniLM embeddings {embeddings_m1.shape}")
 
-# --- Model 2: MPNET embeddings ---
-if os.path.exists(EMBEDDINGS_PATH_M2):
-    print("Loading MPNET embeddings from disk...")
-    embeddings_m2 = np.load(EMBEDDINGS_PATH_M2)
-    print(f"Loaded MPNET embeddings shape: {embeddings_m2.shape}")
-else:
-    print("Computing MPNET embeddings...")
-    embeddings_m2 = embedder_m2.encode(
-        all_chunks,
-        convert_to_numpy=True,
-        show_progress_bar=True,
-        batch_size=64
-    ).astype("float32")
-    np.save(EMBEDDINGS_PATH_M2, embeddings_m2)
-    print(f"Saved MPNET embeddings {embeddings_m2.shape}")
+# # --- Model 2: MPNET embeddings ---
+# if os.path.exists(EMBEDDINGS_PATH_M2):
+#     print("Loading MPNET embeddings from disk...")
+#     embeddings_m2 = np.load(EMBEDDINGS_PATH_M2)
+#     print(f"Loaded MPNET embeddings shape: {embeddings_m2.shape}")
+# else:
+#     print("Computing MPNET embeddings...")
+#     embeddings_m2 = embedder_m2.encode(
+#         all_chunks,
+#         convert_to_numpy=True,
+#         show_progress_bar=True,
+#         batch_size=64
+#     ).astype("float32")
+#     np.save(EMBEDDINGS_PATH_M2, embeddings_m2)
+#     print(f"Saved MPNET embeddings {embeddings_m2.shape}")
 
 # --- PERSISTENCE: Load or Build FAISS Indexes for BOTH models ---
 
@@ -178,18 +178,18 @@ else:
     faiss.write_index(index_m1, INDEX_PATH_M1)
     print(f"Saved MiniLM index with {index_m1.ntotal} vectors")
 
-# Model 2: MPNET index
-if os.path.exists(INDEX_PATH_M2):
-    print("Loading MPNET FAISS index...")
-    index_m2 = faiss.read_index(INDEX_PATH_M2)
-    print(f"Loaded MPNET index with {index_m2.ntotal} vectors")
-else:
-    print("Building MPNET FAISS index...")
-    dim_m2 = embeddings_m2.shape[1]
-    index_m2 = faiss.IndexFlatL2(dim_m2)
-    index_m2.add(embeddings_m2)
-    faiss.write_index(index_m2, INDEX_PATH_M2)
-    print(f"Saved MPNET index with {index_m2.ntotal} vectors")
+# # Model 2: MPNET index
+# if os.path.exists(INDEX_PATH_M2):
+#     print("Loading MPNET FAISS index...")
+#     index_m2 = faiss.read_index(INDEX_PATH_M2)
+#     print(f"Loaded MPNET index with {index_m2.ntotal} vectors")
+# else:
+#     print("Building MPNET FAISS index...")
+#     dim_m2 = embeddings_m2.shape[1]
+#     index_m2 = faiss.IndexFlatL2(dim_m2)
+#     index_m2.add(embeddings_m2)
+#     faiss.write_index(index_m2, INDEX_PATH_M2)
+#     print(f"Saved MPNET index with {index_m2.ntotal} vectors")
 
 # Helper function to build structured results from FAISS search
 def _build_results(query, distances, indices, model_name):
@@ -238,26 +238,26 @@ def retrieve_minilm(query, k=3):
 
 
 # Retrieval function for Model 2: MPNET
-def retrieve_mpnet(query, k=3):
-    """Retrieve using MPNET-base-v2 (more accurate, 768D)"""
-    query_emb = embedder_m2.encode([query], convert_to_numpy=True).astype("float32")
-    distances, indices = index_m2.search(query_emb, k)
+# def retrieve_mpnet(query, k=3):
+#     """Retrieve using MPNET-base-v2 (more accurate, 768D)"""
+#     query_emb = embedder_m2.encode([query], convert_to_numpy=True).astype("float32")
+#     distances, indices = index_m2.search(query_emb, k)
 
-    print(f"[MPNET] Top {k} matches: {indices[0]}, Distances: {distances[0]}")
-    print("Top k rows:")
-    for idx in indices[0]:
-        print(df.iloc[chunk_to_row[idx]])
-    return _build_results(query, distances, indices, "MPNET")
+#     print(f"[MPNET] Top {k} matches: {indices[0]}, Distances: {distances[0]}")
+#     print("Top k rows:")
+#     for idx in indices[0]:
+#         print(df.iloc[chunk_to_row[idx]])
+#     return _build_results(query, distances, indices, "MPNET")
 
 
 # Comparison function - returns results from both models
 def retrieve_compare(query, k=3):
     """Retrieve using both models for comparison"""
     results_m1 = retrieve_minilm(query, k)
-    results_m2 = retrieve_mpnet(query, k)
+    # results_m2 = retrieve_mpnet(query, k)
     return {
         "minilm": results_m1,
-        "mpnet": results_m2
+        # "mpnet": results_m2
     }
 
 # Export functions for use in other modules
@@ -265,9 +265,9 @@ def get_embedded_records_minilm(query, k=3):
     """Get records using MiniLM model"""
     return retrieve_minilm(query, k)
 
-def get_embedded_records_mpnet(query, k=3):
-    """Get records using MPNET model"""
-    return retrieve_mpnet(query, k)
+# def get_embedded_records_mpnet(query, k=3):
+#     """Get records using MPNET model"""
+#     return retrieve_mpnet(query, k)
 
 def get_embedded_records(query, k=3):
     """Get records using both models (for comparison)"""

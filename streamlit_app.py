@@ -15,9 +15,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 ARTIFACTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Embedding", "artifacts")
 REQUIRED_FILES = [
     "embeddings_minilm.npy",
-    "embeddings_mpnet.npy",
+    
     "faiss_minilm.index",
-    "faiss_mpnet.index",
+    
     "chunks.pkl"
 ]
 
@@ -71,7 +71,7 @@ from LLM.LLM_langchain import (
 
 # Try to import embedding functions (may fail if notebook not run)
 try:
-    from Embedding.embeddor import get_embedded_records_minilm, get_embedded_records_mpnet
+    from Embedding.embeddor import get_embedded_records_minilm
     EMBEDDINGS_AVAILABLE = True
 except Exception as e:
     EMBEDDINGS_AVAILABLE = False
@@ -393,8 +393,8 @@ with st.sidebar:
     st.subheader("🔄 Retrieval Method")
     retrieval_method = st.radio(
         "Select retrieval approach:",
-        ["Baseline (Cypher)", "Embeddings (MiniLM)", "Embeddings (MPNET)", "Hybrid (All)"],
-        index=3
+        ["Baseline (Cypher)", "Embeddings (MiniLM)", "Hybrid (All)"],
+        index=2  # Default to Hybrid
     )
     
     st.markdown("---")
@@ -525,14 +525,14 @@ if search_button or user_query:
                     st.warning(f"MiniLM retrieval error: {e}")
                     retrieval_info["minilm"] = 0
             
-            if retrieval_method in ["Embeddings (MPNET)", "Hybrid (All)"]:
-                try:
-                    mpnet_records = get_embedded_records_mpnet(user_query, k=3)
-                    all_records.extend(mpnet_records)
-                    retrieval_info["mpnet"] = len(mpnet_records)
-                except Exception as e:
-                    st.warning(f"MPNET retrieval error: {e}")
-                    retrieval_info["mpnet"] = 0
+            # if retrieval_method in ["Embeddings (MPNET)", "Hybrid (All)"]:
+            #     try:
+            #         mpnet_records = get_embedded_records_mpnet(user_query, k=3)
+            #         all_records.extend(mpnet_records)
+            #         retrieval_info["mpnet"] = len(mpnet_records)
+            #     except Exception as e:
+            #         st.warning(f"MPNET retrieval error: {e}")
+            #         retrieval_info["mpnet"] = 0
     
     # =========================================================================
     # TAB 1: LLM RESPONSE
