@@ -71,7 +71,7 @@ from LLM.LLM_langchain import (
 
 # Try to import embedding functions (may fail if notebook not run)
 try:
-    from Embedding.embeddor import get_embedded_records_minilm
+    from Embedding.Embeddor import get_embedded_records_minilm
     EMBEDDINGS_AVAILABLE = True
 except Exception as e:
     EMBEDDINGS_AVAILABLE = False
