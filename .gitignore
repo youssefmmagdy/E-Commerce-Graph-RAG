@@ -2,7 +2,7 @@
 .env
 */__pycache__/
 # Keep MiniLM embeddings, ignore large MPNET files
-Embedding/artifacts/embeddings_mpnet.npy
-Embedding/artifacts/faiss_mpnet.index
+*/mpnet_embeddings
+
 # Ignore model cache - will be downloaded at runtime
 Embedding/models_cache/
