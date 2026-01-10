@@ -1,3 +1,6 @@
 *.npy filter=lfs diff=lfs merge=lfs -text
 *.index filter=lfs diff=lfs merge=lfs -text
 *.pkl filter=lfs diff=lfs merge=lfs -text
+Embedding/minilm_embedding/*.npy filter=lfs diff=lfs merge=lfs -text
+Embedding/minilm_embedding/*.pkl filter=lfs diff=lfs merge=lfs -text
+Embedding/minilm_embedding/*.index filter=lfs diff=lfs merge=lfs -text
