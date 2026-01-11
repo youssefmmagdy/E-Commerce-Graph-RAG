@@ -354,44 +354,43 @@ def detect_query_type(text, params=None):
     detections = []
     
     # Query 1: Products by category (just category, no city)
-    if 'category' in params and 'city' not in params:
-        if 'product' in text_lower or 'category' in text_lower:
-            detections.append((1, 0.8, "Products by category"))
+    if 'category' in params and 'product' in text_lower:
+        detections.append((1, 0.8, "Products by category"))
     
     # Query 2: Products by category AND city
-    if 'category' in params and 'city' in params:
+    elif 'category' in params and 'city' in params:
         detections.append((2, 0.95, "Products by category and city"))
     
     # Query 3: Products by city (city but no category, and mentions product)
-    if 'city' in params and 'category' not in params and 'product' in text_lower:
+    elif 'city' in params and 'product' in text_lower:
         detections.append((3, 0.9, "Products by city"))
     
     # Query 4: Reviews for product
-    if 'product_id' in params or ('review' in text_lower and 'product' in text_lower):
+    elif 'product_id' in params or ('review' in text_lower and 'product' in text_lower):
         detections.append((4, 0.9, "Reviews for product"))
     
     # Query 5: Orders by customer
-    if 'customer_id' in params or ('order' in text_lower and 'customer' in text_lower):
+    elif 'customer_id' in params or ('order' in text_lower and 'customer' in text_lower):
         detections.append((5, 0.85, "Orders by customer"))
     
     # Query 6: Orders with delays
-    if 'delay_days' in params or 'delay' in text_lower or 'delayed' in text_lower:
+    elif 'delay_days' in params or 'delayed days' in params or 'delay' in text_lower or 'delayed' in text_lower or 'delivery_delay_days' in text_lower:
         detections.append((6, 0.9, "Orders with delivery delays"))
     
     # Query 7: Customers by state
-    if 'state' in params and 'customer' in text_lower:
+    elif 'state' in params and 'customer' in text_lower:
         detections.append((7, 0.85, "Customers by state"))
     
     # Query 8: Get specific order
-    if 'order_id' in params:
+    elif 'order_id' in params and 'order' in text_lower:
         detections.append((8, 0.95, "Get specific order"))
     
     # Query 9: Customers that bought from a specific seller
-    if 'seller_id' in params or 'seller' in text_lower:
+    elif 'seller_id' in params or 'seller' in text_lower and 'customer' in text_lower:
         detections.append((9, 0.85, "Customers by seller"))
     
     # Query 10: Customers by city
-    if 'city' in params and 'customer' in text_lower and 'category' not in params:
+    elif 'city' in params and 'customer' in text_lower:
         detections.append((10, 0.9, "Customers by city"))
     
     # Return best match or default
