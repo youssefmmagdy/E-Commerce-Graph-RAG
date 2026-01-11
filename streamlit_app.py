@@ -449,8 +449,11 @@ examples = [
     "Customers that ordered in São Paulo",                  # QUERY_CUSTOMERS_BY_CITY
 ]
 
-def set_example_query(query):
-    st.session_state.user_query = query
+# Check if an example was clicked (before widget creation)
+for i, example in enumerate(examples):
+    if st.session_state.get(f"ex_{i}_clicked"):
+        st.session_state.user_query = example
+        st.session_state[f"ex_{i}_clicked"] = False  # Reset
 
 col1, col2 = st.columns([4, 1])
 with col1:
@@ -470,7 +473,9 @@ with st.expander("💡 Example Queries (10 Options)"):
     example_cols = st.columns(2)
     for i, example in enumerate(examples):
         with example_cols[i % 2]:
-            st.button(example, key=f"ex_{i}", on_click=set_example_query, args=(example,))
+            if st.button(example, key=f"ex_{i}"):
+                st.session_state[f"ex_{i}_clicked"] = True
+                st.rerun()
 
 # =============================================================================
 # PROCESSING
