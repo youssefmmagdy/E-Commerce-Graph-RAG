@@ -432,6 +432,7 @@ st.markdown('<p class="sub-header">Intelligent Product Search powered by Knowled
 # QUERY INPUT
 # =============================================================================
 # Initialize session state for query
+# Initialize the query in session state
 if "user_query" not in st.session_state:
     st.session_state.user_query = "Electronics in Ibiapine"
 
@@ -449,11 +450,11 @@ examples = [
     "Customers that ordered in São Paulo",                  # QUERY_CUSTOMERS_BY_CITY
 ]
 
-# Check if an example was clicked (before widget creation)
+# Check if an example was clicked BEFORE creating the text_input widget
 for i, example in enumerate(examples):
     if st.session_state.get(f"ex_{i}_clicked"):
         st.session_state.user_query = example
-        st.session_state[f"ex_{i}_clicked"] = False  # Reset
+        st.session_state[f"ex_{i}_clicked"] = False
 
 col1, col2 = st.columns([4, 1])
 with col1:
@@ -461,21 +462,22 @@ with col1:
         "🔍 Enter your query:",
         placeholder="e.g., Electronics in Ibiapine, Products with good reviews, Delayed deliveries...",
         value=st.session_state.user_query,
-        key="query_input"
     )
-    # Update session state when user types
+    # Sync back to session state
     st.session_state.user_query = user_query
 with col2:
     search_button = st.button("🚀 Search", type="primary", use_container_width=True)
 
-# Example query buttons
+# Example query buttons - use callback pattern
+def set_example(example_text, idx):
+    st.session_state[f"ex_{idx}_clicked"] = True
+
 with st.expander("💡 Example Queries (10 Options)"):
     example_cols = st.columns(2)
     for i, example in enumerate(examples):
         with example_cols[i % 2]:
-            if st.button(example, key=f"ex_{i}"):
-                st.session_state[f"ex_{i}_clicked"] = True
-                st.rerun()
+            st.button(example, key=f"ex_{i}", on_click=set_example, args=(example, i))
+                
 
 # =============================================================================
 # PROCESSING
