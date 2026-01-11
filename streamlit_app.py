@@ -434,7 +434,7 @@ st.markdown('<p class="sub-header">Intelligent Product Search powered by Knowled
 # Initialize session state for query
 # Initialize the query in session state
 if "user_query" not in st.session_state:
-    st.session_state.user_query = "Electronics in Ibiapine"
+    st.session_state.user_query = "Products by category: Electronics"
 
 # Example queries - matching 10 Cypher queries
 examples = [

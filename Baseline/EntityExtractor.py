@@ -354,7 +354,7 @@ def detect_query_type(text, params=None):
     detections = []
     
     # Query 1: Products by category (just category, no city)
-    if 'category' in params and 'product' in text_lower:
+    if 'category' in params and 'product' in text_lower and not 'city' in params:
         detections.append((1, 0.8, "Products by category"))
     
     # Query 2: Products by category AND city
