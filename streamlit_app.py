@@ -36,9 +36,9 @@ def check_and_generate_embeddings():
         st.info(f"🔄 Embeddings not found. Generating embeddings... This may take a few minutes.")
         st.write(f"Missing files: {', '.join(missing_files)}")
         
-        embeddor_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Embedding", "Embeddor.py")
+        embeddor_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Embedding", "embeddor.py")
         
-        with st.spinner("Generating embeddings with Embeddor.py..."):
+        with st.spinner("Generating embeddings with embeddor.py..."):
             try:
                 result = subprocess.run(
                     [sys.executable, embeddor_path],
@@ -71,7 +71,7 @@ from LLM.LLM_langchain import (
 
 # Try to import embedding functions (may fail if notebook not run)
 try:
-    from Embedding.embeddor import get_embedded_records_minilm
+    from Embedding.Embeddor import get_embedded_records_minilm
     EMBEDDINGS_AVAILABLE = True
 except Exception as e:
     EMBEDDINGS_AVAILABLE = False
@@ -449,8 +449,11 @@ examples = [
     "Customers that ordered in São Paulo",                  # QUERY_CUSTOMERS_BY_CITY
 ]
 
-def set_example_query(query):
-    st.session_state.user_query = query
+# Check if an example was clicked (before widget creation)
+for i, example in enumerate(examples):
+    if st.session_state.get(f"ex_{i}_clicked"):
+        st.session_state.user_query = example
+        st.session_state[f"ex_{i}_clicked"] = False  # Reset
 
 col1, col2 = st.columns([4, 1])
 with col1:
@@ -470,7 +473,9 @@ with st.expander("💡 Example Queries (10 Options)"):
     example_cols = st.columns(2)
     for i, example in enumerate(examples):
         with example_cols[i % 2]:
-            st.button(example, key=f"ex_{i}", on_click=set_example_query, args=(example,))
+            if st.button(example, key=f"ex_{i}"):
+                st.session_state[f"ex_{i}_clicked"] = True
+                st.rerun()
 
 # =============================================================================
 # PROCESSING
