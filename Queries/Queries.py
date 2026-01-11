@@ -25,6 +25,7 @@ RETURN DISTINCT
     p.product_photos_qty AS product_photos_qty,
     oi.price AS price,
     oi.freight_value AS freight_value,
+    c.customer_city AS customer_city,
     total_count
 LIMIT 10
 """
