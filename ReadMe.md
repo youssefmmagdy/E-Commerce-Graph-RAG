@@ -1,27 +1,66 @@
-# Graph-RAG for E-Commerce Knowledge Graph
-## Final Project Report
+# 🛒 E-Commerce Graph-RAG Assistant
 
-**Project Title:** Knowledge Graph-based Retrieval Augmented Generation (Graph-RAG) for E-Commerce Analytics  
-**Student:** Yusuf  
-**Course:** Advanced Computational Linguistics (M3) - Semester 9  
-**Institution:** Faculty of Media Engineering and Technology, The German International University in Berlin  
-**Date:** December 2025
+<div align="center">
 
----
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-graph-rag.streamlit.app/)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![Neo4j](https://img.shields.io/badge/Neo4j-Knowledge%20Graph-green.svg)](https://neo4j.com/)
+[![HuggingFace](https://img.shields.io/badge/🤗-HuggingFace%20LLMs-yellow.svg)](https://huggingface.co/)
 
-## Table of Contents
-1. [System Architecture](#system-architecture)
-2. [Retrieval Strategy](#retrieval-strategy)
-3. [LLM Comparison Analysis](#llm-comparison-analysis)
-4. [Error Analysis & Fixes](#error-analysis--fixes)
-5. [Improvements Implemented](#improvements-implemented)
-6. [Theme-Specific Insights](#theme-specific-insights)
-7. [Remaining Limitations](#remaining-limitations)
-8. [Conclusion & Future Work](#conclusion--future-work)
+**Intelligent E-Commerce Search powered by Knowledge Graphs + Large Language Models**
+
+[🚀 **Live Demo**](https://ecommerce-graph-rag.streamlit.app/) | [📊 Features](#features) | [🏗️ Architecture](#system-architecture) | [📦 Installation](#installation)
+
+</div>
 
 ---
 
-## System Architecture
+## 📸 Demo
+
+<!-- Add your GIF here -->
+<div align="center">
+  <img src="assets/demo.gif" alt="E-Commerce Graph-RAG Demo" width="800">
+  <p><em>Interactive demo showing product search, knowledge graph visualization, and multi-model LLM comparison</em></p>
+</div>
+
+---
+
+## ✨ Features
+
+- 🔍 **Hybrid Retrieval**: Combines structured Cypher queries with semantic vector search
+- 🧠 **Multi-Model LLM Comparison**: Compare responses from Gemma 2B, Llama 3.2 3B, and Llama 3.2 1B
+- 📊 **Interactive Knowledge Graph Visualization**: Real-time graph rendering with Plotly
+- 🏷️ **Named Entity Recognition**: Automatic extraction of products, categories, cities, and more
+- ⚡ **Real-time Analytics**: Response time, token usage, and quality metrics
+- 📝 **Evaluation Framework**: Built-in qualitative scoring for model comparison
+
+---
+
+## 🎯 Quick Start
+
+### Try it Online
+👉 **[Launch the App](https://ecommerce-graph-rag.streamlit.app/)**
+
+### Run Locally
+```bash
+# Clone the repository
+git clone https://github.com/youssefmmagdy/M3_ACL2_Submission.git
+cd M3_ACL2_Submission
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
+streamlit run streamlit_app.py
+```
+
+---
+
+## 🏗️ System Architecture
 
 ### Overview
 The Graph-RAG system follows a hybrid retrieval-augmented generation pipeline that combines:
@@ -84,9 +123,9 @@ The Graph-RAG system follows a hybrid retrieval-augmented generation pipeline th
                        │
         ┌──────────────▼──────────────┐
         │      LLM LAYER (3 Models)   │
-        ├─ Mistral-7B                │
-        ├─ Llama-2-7B                │
-        ├─ Gemma-7B                  │
+        ├─ Gemma 2 2B                │
+        ├─ Llama 3.2 3B              │
+        ├─ Llama 3.2 1B              │
         └──────────────┬──────────────┘
                        │
         ┌──────────────▼──────────────┐
@@ -856,19 +895,27 @@ Minas Gerais  | 654       | 2,890  | 4.2        | Home
 
 ## Appendices
 
-### A. File Structure
+### A. Project Structure
 ```
-M3_Demo/
-├── SemanticEmbeddings.ipynb      # Main notebook with 6 embedders
-├── LLMLayer.py                   # LLM integration & comparison
-├── Queries.py                    # 15 Cypher query templates
-├── EntityExtractor.py            # Entity extraction with PhraseMatcher
-├── EntityMapper.py               # Entity to query parameter mapping
-├── QueryExecuter.py              # Query execution pipeline
-├── app.py                        # Streamlit UI dashboard
+M3_ACL2_Submission/
+├── streamlit_app.py              # Main Streamlit UI application
 ├── requirements.txt              # Python dependencies
-├── FINAL_REPORT.md               # This report
-└── .env                          # Neo4j credentials (not in repo)
+├── runtime.txt                   # Python version for deployment
+├── Baseline/
+│   ├── Baseline.py               # Baseline retrieval logic
+│   ├── EntityExtractor.py        # Entity extraction with spaCy
+│   └── EntityMapper.py           # Entity to query parameter mapping
+├── Database/
+│   └── Database.py               # Neo4j database connection
+├── Embedding/
+│   ├── Embeddor.py               # Sentence embeddings & FAISS
+│   └── artifacts/                # Pre-computed embeddings
+├── LLM/
+│   └── LLM_langchain.py          # LangChain-based LLM integration
+├── Queries/
+│   └── Queries.py                # Cypher query templates
+└── assets/
+    └── demo.gif                  # Demo GIF for README
 ```
 
 ### B. Quantitative Metrics Summary
@@ -876,22 +923,34 @@ M3_Demo/
 | Metric | Value | Status |
 |--------|-------|--------|
 | Total Nodes Embedded | 6 types | ✅ Complete |
-| Embedding Dimensions | 385-386D | ✅ Optimal |
-| Query Templates | 15 | ✅ All themes |
+| Embedding Dimensions | 384D (MiniLM) | ✅ Optimal |
+| Query Templates | 10+ | ✅ All themes |
 | LLM Models Tested | 3 | ✅ Comprehensive |
 | Error Handling Cases | 5+ | ✅ Robust |
-| UI Features | 8 | ✅ Functional |
+| UI Features | 8+ | ✅ Functional |
 
 ### C. Resources & References
 - Neo4j Documentation: https://neo4j.com/docs/
 - Sentence-Transformers: https://www.sbert.net/
 - Streamlit: https://streamlit.io/
 - HuggingFace Models: https://huggingface.co/models
-- Graph-RAG Research: https://arxiv.org/abs/2404.16130
+- LangChain: https://langchain.com/
+- FAISS: https://github.com/facebookresearch/faiss
 
 ---
 
-**Project Status:** ✅ COMPLETE
+## 📄 License
 
-**Last Updated:** December 20, 2025  
-**Version:** 1.0 Final
+This project is developed as part of the Advanced Computational Linguistics (M3) course at the German International University in Berlin.
+
+---
+
+<div align="center">
+
+**Made with ❤️ using Streamlit, Neo4j, and HuggingFace**
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-graph-rag.streamlit.app/)
+
+**Last Updated:** January 2026 | **Version:** 2.0
+
+</div>
