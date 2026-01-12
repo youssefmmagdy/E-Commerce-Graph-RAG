@@ -17,7 +17,7 @@
 
 ## 📸 Demo
 
-[Demo GIF](demo.gif)
+![Live Demo](demo.gif)
 <div align="center">
   <img src="assets/demo.gif" alt="E-Commerce Graph-RAG Demo" width="800">
   <p><em>Interactive demo showing product search, knowledge graph visualization, and multi-model LLM comparison</em></p>
