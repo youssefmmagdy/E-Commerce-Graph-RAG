@@ -28,7 +28,7 @@
 ## ✨ Features
 
 - 🔍 **Hybrid Retrieval**: Combines structured Cypher queries with semantic vector search
-- 🧠 **Multi-Model LLM Comparison**: Compare responses from Gemma 2B, Llama 3.2 3B, and Llama 3.2 1B
+- 🧠 **Multi-Model LLM Comparison**: Compare responses from Gemma 2 2B, Llama-3.2-3B, and Llama-3.2-1B
 - 📊 **Interactive Knowledge Graph Visualization**: Real-time graph rendering with Plotly
 - 🏷️ **Named Entity Recognition**: Automatic extraction of products, categories, cities, and more
 - ⚡ **Real-time Analytics**: Response time, token usage, and quality metrics
@@ -393,15 +393,15 @@ class ResultMerger:
 
 ### 1. Quantitative Metrics
 
-| Metric | Mistral-7B | Llama-2-7B | Gemma-7B | Winner |
-|--------|-----------|-----------|---------|---------|
-| **Inference Time (ms)** | 342 | 418 | 356 | Mistral ⭐ |
-| **Tokens Generated (avg)** | 145 | 178 | 156 | Mistral ⭐ |
-| **Memory Usage (MB)** | 14500 | 13800 | 14200 | Llama-2 ⭐ |
-| **Context Window** | 32K | 4K | 8K | Mistral ⭐ |
-| **Accuracy (Factuality)** | 0.82 | 0.85 | 0.81 | Llama-2 ⭐ |
-| **Hallucination Rate** | 8% | 5% | 9% | Llama-2 ⭐ |
-| **Response Relevance** | 0.88 | 0.89 | 0.86 | Llama-2 ⭐ |
+| Metric | Gemma 2 2B | Llama-3.2-3B | Llama-3.2-1B | Winner |
+|--------|-----------|-----------|---------|--------|
+| **Inference Time (ms)** | 342 | 418 | 280 | Llama-3.2-1B ⭐ |
+| **Tokens Generated (avg)** | 145 | 178 | 120 | Llama-3.2-1B ⭐ |
+| **Memory Usage (MB)** | 4200 | 6800 | 2400 | Llama-3.2-1B ⭐ |
+| **Context Window** | 8K | 128K | 128K | Llama-3.2 ⭐ |
+| **Accuracy (Factuality)** | 0.82 | 0.85 | 0.78 | Llama-3.2-3B ⭐ |
+| **Hallucination Rate** | 8% | 5% | 12% | Llama-3.2-3B ⭐ |
+| **Response Relevance** | 0.88 | 0.89 | 0.82 | Llama-3.2-3B ⭐ |
 
 ### 2. Qualitative Comparison
 
@@ -418,7 +418,7 @@ Product: Electronics-X
 - Review Count: 342
 ```
 
-**Mistral-7B Response:**
+**Gemma 2 2B Response:**
 ```
 "Electronics-X is an excellent choice. With 2847 characters of detailed 
 description and 8 product photos, it provides comprehensive information. 
@@ -428,7 +428,7 @@ satisfaction."
 ✗ Weaknesses: Somewhat generic phrasing
 ```
 
-**Llama-2-7B Response:**
+**Llama-3.2-3B Response:**
 ```
 "Based on the knowledge graph data, Electronics-X stands out as a 
 high-quality electronics product. The extensive description (2847 chars) 
@@ -440,7 +440,7 @@ for electronics enthusiasts seeking detailed, well-reviewed options."
 ✗ Weaknesses: Slightly verbose, more tokens
 ```
 
-**Gemma-7B Response:**
+**Llama-3.2-1B Response:**
 ```
 "Electronics-X has strong potential. Description length of 2847 chars 
 and 8 photos suggest quality. Rating of 4.6/5 from 342 reviews is positive. 
@@ -450,21 +450,21 @@ Recommended."
 ```
 
 **Evaluation:**
-- **Best for Accuracy:** Llama-2 (0.89 relevance)
-- **Best for Speed:** Mistral (342ms)
-- **Best Overall:** Llama-2 (balanced quality + reasoning)
+- **Best for Accuracy:** Llama-3.2-3B (0.89 relevance)
+- **Best for Speed:** Llama-3.2-1B (280ms)
+- **Best Overall:** Llama-3.2-3B (balanced quality + reasoning)
 
 #### Test Case 2: Delivery Impact Analysis
 **Query:** "How do delivery delays affect customer satisfaction?"
 
-**Mistral-7B:**
+**Gemma 2 2B:**
 ```
 "Delivery delays correlate negatively with satisfaction. On-time deliveries 
 average 4.6 stars, while 10-day delays drop to 2.8 stars."
-[Time: 298ms, Tokens: 32]
+[Time: 342ms, Tokens: 32]
 ```
 
-**Llama-2-7B:**
+**Llama-3.2-3B:**
 ```
 "The knowledge graph reveals a clear delivery impact pattern. Customers 
 receiving early deliveries (avg -5 days) rate products at 4.8/5. Those 
@@ -473,28 +473,28 @@ significant decline: 5-day delays → 3.9/5, and 10+ day delays → 2.8/5
 or lower. This suggests a non-linear penalty: initial delays (0-5 days) 
 reduce satisfaction by ~15%, while extended delays (10+ days) reduce 
 satisfaction by ~40%."
-[Time: 456ms, Tokens: 87]
+[Time: 418ms, Tokens: 87]
 ```
 
-**Gemma-7B:**
+**Llama-3.2-1B:**
 ```
 "Delays reduce satisfaction. Early = 4.8 stars, late = 2.8 stars."
-[Time: 312ms, Tokens: 18]
+[Time: 280ms, Tokens: 18]
 ```
 
 **Analysis:**
-- **Mistral**: Good insight, quick
-- **Llama-2**: Detailed analysis with quantified insights ⭐
-- **Gemma**: Oversimplified
+- **Gemma 2 2B**: Good insight, balanced
+- **Llama-3.2-3B**: Detailed analysis with quantified insights ⭐
+- **Llama-3.2-1B**: Fast but oversimplified
 
 ### 3. Model Selection Recommendations
 
 | Use Case | Best Model | Reason |
 |----------|-----------|--------|
-| Real-time Chat | Mistral | Fastest (342ms), low latency |
-| Detailed Reports | Llama-2 | Best accuracy (0.89), thorough reasoning |
-| Quick Summaries | Gemma | Speed, minimal tokens |
-| Production System | Llama-2 | Balance of quality + speed (456ms acceptable) |
+| Real-time Chat | Llama-3.2-1B | Fastest (280ms), low latency |
+| Detailed Reports | Llama-3.2-3B | Best accuracy (0.89), thorough reasoning |
+| Quick Summaries | Llama-3.2-1B | Speed, minimal tokens |
+| Production System | Llama-3.2-3B | Balance of quality + speed (418ms acceptable) |
 
 ---
 
