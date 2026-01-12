@@ -168,16 +168,13 @@ Relationships:
 └─ LOCATED_IN: Customer/Seller → State
 ```
 
-#### 2. **Embedding Models (2 for Comparison)**
+#### 2. **Embedding Models**
 - **Model 1**: MiniLM-L6-v2 (384-D, Fast)
   - Dimensions: 384 text + numeric features
   - Speed: ~100ms per query
   - Use case: Real-time recommendations
   
-- **Model 2**: MPNET-base-v2 (768-D, Accurate)
-  - Dimensions: 768 text + numeric features
-  - Speed: ~200ms per query
-  - Use case: High-quality similarity search
+
 
 #### 3. **Data Processing Pipeline**
 ```
@@ -499,111 +496,12 @@ satisfaction by ~40%."
 
 ---
 
-## Error Analysis & Fixes
-
-### Error 1: Float Instead of String (NaN Handling)
-**Problem:** Review titles and product categories stored as float (NaN) values
-```python
-TypeError: 'float' object is not subscriptable
-# When trying to slice: query_title[:60]
-```
-
-**Root Cause:** Neo4j stores NULL as float NaN in Python
-
-**Fix Implemented:**
-```python
-def _safe_str(value, max_len=None):
-    """Convert value to string safely, handling None and float types"""
-    if value is None or (isinstance(value, float) and str(value) == 'nan'):
-        return '[No text]'
-    text = str(value).strip()
-    if max_len and len(text) > max_len:
-        return text[:max_len] + '...'
-    return text
-```
-
-**Result:** ✅ All 38,289 reviews processed without errors
-
----
-
-### Error 2: Property Name Typo (Schema Mismatch)
-**Problem:** Neo4j had `product_description_lenght` (typo) vs code expected `product_description_length`
-
-**Root Cause:** Schema inconsistency during data import
-
-**Fix:** Updated all references to use correct property name
-
-**Impact:** ✅ Product embeddings now correctly include description length feature
-
----
-
-### Error 3: Order Node Using Wrong Properties
-**Problem:** Code referenced `o.price` and `o.freight_value` on Order node
-**Actual Schema:** These properties only exist on OrderItem node
-
-```cypher
-# WRONG:
-MATCH (o:Order)
-RETURN o.price, o.freight_value
-
-# Result: NULL values, broken embeddings
-```
-
-**Fix:** Changed to use Order-specific properties
-```cypher
-# CORRECT:
-MATCH (o:Order)
-RETURN o.order_status, o.delivery_delay_days
-```
-
-**Impact:** ✅ Order embeddings now use correct numeric features (385-D)
-
----
-
-### Error 4: Relationship Name Mismatch
-**Problem:** Code used `[:CONTAINS_PRODUCT]` but schema defined `[:REFERS_TO]`
-
-**Fix:** Updated all OrderItem→Product queries
-```cypher
-# WRONG:
-MATCH (oi:OrderItem)-[:CONTAINS_PRODUCT]->(p:Product)
-
-# CORRECT:
-MATCH (oi:OrderItem)-[:REFERS_TO]->(p:Product)
-```
-
-**Impact:** ✅ OrderItem-Product queries now return correct results
-
----
-
-### Error 5: Neo4j Record Indexing
-**Problem:** Attempted dictionary-style access on Neo4j Records
-```python
-result[0]['product_id']  # KeyError: 'product_id'
-```
-
-**Root Cause:** Records use positional indexing, not dictionary keys
-
-**Fix:**
-```python
-# WRONG:
-sample_product = result[0]['product_id']
-
-# CORRECT:
-sample_product = result[0][0]  # First record, first value
-```
-
-**Impact:** ✅ LLMLayer.py now executes without errors
-
----
-
 ## Improvements Implemented
 
 ### 1. **Dual Embedding Model Strategy**
 **Before:** Single embedding model
-**After:** Two models for comparison
+**After:** 
 - **MiniLM-384D**: Fast, for real-time queries
-- **MPNET-768D**: Accurate, for offline processing
 **Benefit:** Users can choose speed vs accuracy trade-off
 
 ### 2. **Features Vector Embeddings (Option 2)**
@@ -823,23 +721,6 @@ Minas Gerais  | 654       | 2,890  | 4.2        | Home
    - **Impact:** May miss domain-specific patterns
    - **Solution:** Fine-tune or use domain-specific LLMs
 
-### Functional Limitations
-
-1. **No Real-time Updates**
-   - **Issue:** Embeddings computed offline, not updated on new data
-   - **Solution:** Implement streaming embedding updates
-
-2. **Single Language**
-   - **Issue:** Only English support (translated from Portuguese)
-   - **Impact:** Nuance may be lost in translation
-   - **Solution:** Multi-lingual embeddings
-
-3. **Limited Reasoning**
-   - **Issue:** Cannot perform complex multi-hop reasoning
-   - **Impact:** Some business questions require manual analysis
-   - **Solution:** Implement knowledge graph reasoning engine
-
----
 
 ## Conclusion & Future Work
 
@@ -865,32 +746,6 @@ Minas Gerais  | 654       | 2,890  | 4.2        | Home
 - 5 major errors identified and fixed
 - Robust data quality handling
 - Schema compliance verification
-
-### Recommended Future Work
-
-**Phase 1: Enhancement (1-2 weeks)**
-1. Fine-tune embedding models on e-commerce domain
-2. Implement approximate nearest neighbor search (FAISS)
-3. Add temporal analysis with timestamps
-4. Deploy on cloud infrastructure (AWS/Azure)
-
-**Phase 2: Advanced Features (2-4 weeks)**
-1. Implement graph reasoning engine for complex queries
-2. Add real-time embedding updates
-3. Multi-lingual support with translation options
-4. User feedback loop for continuous improvement
-
-**Phase 3: Production Hardening (4+ weeks)**
-1. Add authentication and authorization
-2. Implement audit logging
-3. Set up monitoring and alerting
-4. Performance optimization at scale (10M+ records)
-
-### Performance Targets
-- Query response time: <2 seconds (current: ~0.5-1.5s)
-- System accuracy: >90% (current: ~85%)
-- Hallucination rate: <2% (current: 5-9%)
-- System uptime: >99.5%
 
 ---
 
@@ -942,7 +797,7 @@ M3_ACL2_Submission/
 
 ## 📄 License
 
-This project is developed as part of the Advanced Computational Linguistics (M3) course at the German International University in Berlin.
+This project is developed as part of the Advanced Computer Lab (Milestone 3) course at the German International University in Berlin.
 
 ---
 
