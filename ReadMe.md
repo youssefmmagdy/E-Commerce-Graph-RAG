@@ -5,6 +5,7 @@
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-graph-rag.streamlit.app/)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![Neo4j](https://img.shields.io/badge/Neo4j-Knowledge%20Graph-green.svg)](https://neo4j.com/)
+[![LangChain](https://img.shields.io/badge/🦜-LangChain-orange.svg)](https://langchain.com/)
 [![HuggingFace](https://img.shields.io/badge/🤗-HuggingFace%20LLMs-yellow.svg)](https://huggingface.co/)
 
 **Intelligent E-Commerce Search powered by Knowledge Graphs + Large Language Models**
@@ -947,7 +948,7 @@ This project is developed as part of the Advanced Computational Linguistics (M3)
 
 <div align="center">
 
-**Made with ❤️ using Streamlit, Neo4j, and HuggingFace**
+**Made with ❤️ using Streamlit, Neo4j, LangChain, and HuggingFace**
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ecommerce-graph-rag.streamlit.app/)
 
